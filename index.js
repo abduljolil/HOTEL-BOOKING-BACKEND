@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookie = require('cookie-parser');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 require('dotenv').config()
 const port =process.env.PORT || 5000 ;
@@ -12,8 +12,9 @@ app.use(cors({
   origin: ['http://localhost:5173'],
   credentials: true
 }));
-  app.use(express.json());
-  app.use(cookie()); 
+app.use(express.json());
+app.use(cookie());
+ 
   
 
 const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@cluster0.j0ovfoc.mongodb.net/?retryWrites=true&w=majority`;
@@ -26,6 +27,7 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
 const logger =(req,res,next)=>{
   console.log('called',req.host,req.originalUrl)
   next();
@@ -48,12 +50,14 @@ const logger =(req,res,next)=>{
     })
    
   }
+ 
+  
 
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-
+    const roomsCollection = client.db('hotel').collection('rooms');
 
     app.post('/jwt', logger,async(req,res)=>{
       const user =req.body;
@@ -67,12 +71,31 @@ async function run() {
       })
       .send({success:true});
     })
+
+
+ 
+
+    
+    // server api
+    app.get('/rooms',async(req,res)=>{
+      const result = await roomsCollection.find().toArray();
+      res.send(result);
+     })
+
+     app.get('/rooms/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await roomsCollection.findOne(query);
+      res.send(result);
+     })
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
