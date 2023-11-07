@@ -58,6 +58,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const roomsCollection = client.db('hotel').collection('rooms');
+    const  offerCollection = client.db('hotel').collection('offer');
 
     app.post('/jwt', logger,async(req,res)=>{
       const user =req.body;
@@ -79,6 +80,10 @@ async function run() {
     // server api
     app.get('/rooms',async(req,res)=>{
       const result = await roomsCollection.find().toArray();
+      res.send(result);
+     })
+    app.get('/offer',async(req,res)=>{
+      const result = await offerCollection.find().toArray();
       res.send(result);
      })
 
