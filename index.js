@@ -9,7 +9,7 @@ const port =process.env.PORT || 5000 ;
 
 // middleware
 app.use(cors({
-  origin: ['http://localhost:5173'],
+  origin: ['http://localhost:5173',"https://assingment-10-frontent.web.app"],
   credentials: true
 }));
 app.use(express.json());
@@ -56,7 +56,7 @@ const logger =(req,res,next)=>{
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     const roomsCollection = client.db('hotel').collection('rooms');
     const  offerCollection = client.db('hotel').collection('offer');
     const  bookingCollection = client.db('hotel').collection('booking');
@@ -70,7 +70,7 @@ async function run() {
       cookie('token',token,{
         httpOnly:true,
         secure:false,
-      
+        sameSite:'none'
       })
       .send({success:true});
     })
@@ -106,24 +106,14 @@ async function run() {
       res.send(result);
      })
 
-     app.post('/booking',logger, async(req,res)=>{
+     app.post('/booking', logger,async(req,res)=>{
       const user = req.body;
-      const result = await bookingCollection.insertOne(user);
+      const result = await checkOutCollection.insertOne(user);
       res.send(result);
      })
 
-     app.get('/booking',logger,verifyToken,async(req,res)=>{
-      console.log(req.query.email);
-      // console.log(req.cookies.token);
-      console.log('user in the vailed token',req.user);
-      if(req.query.email !== req.user.email){
-        return res.status(403).send({message:'forbidden access'})
-      }
-      let query ={};
-      if(req.query?.email){
-        query={email: req.query.email}
-      }
-      const result = await bookingCollection.find(query).toArray();
+     app.get('/booking', async(req,res)=>{
+      const result = await bookingCollection.find( ).toArray();
       res.send(result);
     })
 
@@ -151,7 +141,7 @@ async function run() {
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
