@@ -106,6 +106,49 @@ async function run() {
       res.send(result);
      })
 
+     app.post('/booking',logger, async(req,res)=>{
+      const user = req.body;
+      const result = await bookingCollection.insertOne(user);
+      res.send(result);
+     })
+
+     app.get('/booking',logger,verifyToken,async(req,res)=>{
+      console.log(req.query.email);
+      // console.log(req.cookies.token);
+      console.log('user in the vailed token',req.user);
+      if(req.query.email !== req.user.email){
+        return res.status(403).send({message:'forbidden access'})
+      }
+      let query ={};
+      if(req.query?.email){
+        query={email: req.query.email}
+      }
+      const result = await bookingCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    app.patch('/booking/:id', logger,async(req,res)=>{
+      const id =req.params.id;
+      const filter ={_id:new ObjectId(id)};
+      const update= req.body;
+      console.log(update);
+      const updateDoc = {
+        $set: {
+          status:update.status
+        },
+      };
+      const result = await bookingCollection.updateOne(filter, updateDoc);
+      res.send(result);
+     })
+
+     app.delete('/booking/:id', logger,async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id:new ObjectId(id)}
+      const result =await bookingCollection.deleteOne(query);
+      res.send(result);
+     })
+
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
