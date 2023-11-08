@@ -26,7 +26,7 @@ const client = new MongoClient(uri, {
     strict: true,
     deprecationErrors: true,
   }
-});
+}); 
 
 const logger =(req,res,next)=>{
   console.log('called',req.host,req.originalUrl)
@@ -59,11 +59,13 @@ async function run() {
     await client.connect();
     const roomsCollection = client.db('hotel').collection('rooms');
     const  offerCollection = client.db('hotel').collection('offer');
+    const  bookingCollection = client.db('hotel').collection('booking');
 
     app.post('/jwt', logger,async(req,res)=>{
       const user =req.body;
       console.log({user});
       const token = jwt.sign(user,process.env.ACCESS_TOKEN,{expiresIn:'1h'});
+      console.log(token);
       res.
       cookie('token',token,{
         httpOnly:true,
@@ -73,13 +75,23 @@ async function run() {
       .send({success:true});
     })
 
-
- 
-
-    
     // server api
     app.get('/rooms',async(req,res)=>{
-      const result = await roomsCollection.find().toArray();
+
+      let queryObj ={}
+      let sortObj={}
+
+      const category =req.query.category;
+      const sortField=req.query.sortField;
+      const sortOrder=req.query.sortOrder;
+      if(category){
+        queryObj.category=category;
+      }
+      if(sortField && sortOrder){
+        sortObj[sortField]=sortOrder
+      }
+
+      const result = await roomsCollection.find(queryObj).sort({}).toArray();
       res.send(result);
      })
     app.get('/offer',async(req,res)=>{
