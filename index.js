@@ -1,11 +1,14 @@
-const express = require('express');
-const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const cookie = require('cookie-parser');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const app = express();
 require('dotenv').config()
+const express = require('express');
+const jwt = require('jsonwebtoken');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port =process.env.PORT || 5000 ;
+const cookie = require('cookie-parser');
+
+const app = express();
+const cors = require('cors');
+
+
 
 // middleware
 app.use(cors({
@@ -106,9 +109,9 @@ async function run() {
       res.send(result);
      })
 
-     app.post('/booking', logger,async(req,res)=>{
+     app.post('/booking', async(req,res)=>{
       const user = req.body;
-      const result = await checkOutCollection.insertOne(user);
+      const result = await bookingCollection.insertOne(user);
       res.send(result);
      })
 
@@ -117,7 +120,7 @@ async function run() {
       res.send(result);
     })
 
-    app.patch('/booking/:id', logger,async(req,res)=>{
+    app.patch('/booking/:id',async(req,res)=>{
       const id =req.params.id;
       const filter ={_id:new ObjectId(id)};
       const update= req.body;
@@ -131,7 +134,7 @@ async function run() {
       res.send(result);
      })
 
-     app.delete('/booking/:id', logger,async(req,res)=>{
+     app.delete('/booking/:id', async(req,res)=>{
       const id = req.params.id;
       const query = {_id:new ObjectId(id)}
       const result =await bookingCollection.deleteOne(query);
@@ -140,7 +143,6 @@ async function run() {
 
 
 
-    // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
