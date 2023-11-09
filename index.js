@@ -127,7 +127,7 @@ async function run() {
       console.log(update);
       const updateDoc = {
         $set: {
-          status:update.status
+          date:update.date,
         },
       };
       const result = await bookingCollection.updateOne(filter, updateDoc);
@@ -140,6 +140,7 @@ async function run() {
       const result =await bookingCollection.deleteOne(query);
       res.send(result);
      })
+
 
 
 
